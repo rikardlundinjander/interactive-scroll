@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface ScrollIndicatorProps {
   scrollProgress: number;
@@ -16,36 +16,74 @@ export function ScrollIndicator({
   currentTitle,
 }: ScrollIndicatorProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [isResting, setIsResting] = useState(false);
+  const inactivityTimeoutRef = useRef<number | null>(null);
+
+  const scheduleResting = () => {
+    if (inactivityTimeoutRef.current !== null) {
+      window.clearTimeout(inactivityTimeoutRef.current);
+    }
+    setIsResting(false);
+    inactivityTimeoutRef.current = window.setTimeout(() => {
+      setIsResting(true);
+    }, 5000);
+  };
+
+  // Start inactivity timer on mount and clean up on unmount
+  useEffect(() => {
+    scheduleResting();
+    return () => {
+      if (inactivityTimeoutRef.current !== null) {
+        window.clearTimeout(inactivityTimeoutRef.current);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Any scroll activity resets the timer and returns to default state
+  useEffect(() => {
+    scheduleResting();
+  }, [scrollProgress]);
 
   // Calculate position: move from top to bottom as user scrolls
   const topPosition = 16 + scrollProgress * (window.innerHeight - 270);
 
+  const isExpanded = isHovered && !isResting;
+  const outerBorderRadius = isResting ? '12px' : isExpanded ? '24px' : '40px';
+  const transitionTiming = '0.25s cubic-bezier(0.65, 0, 0.35, 1)';
+
   return (
     <div
-      className="fixed right-[24px] z-50"
+      className="fixed right-[16px] z-50"
       style={{ 
         top: `${topPosition}px`,
-        width: isHovered ? '288px' : '64px',
-        height: isHovered ? '270px' : '199px',
-        transition: 'width 0.25s cubic-bezier(0.65, 0, 0.35, 1), height 0.25s cubic-bezier(0.65, 0, 0.35, 1)',
+        width: isResting ? '4px' : isExpanded ? '288px' : '64px',
+        height: isResting ? '140px' : isExpanded ? '270px' : '199px',
+        transition: `width ${transitionTiming}, height ${transitionTiming}`,
       }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={() => {
+        setIsHovered(true);
+        scheduleResting();
+      }}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        scheduleResting();
+      }}
     >
       <div 
         className="backdrop-blur-[24px] bg-[rgba(0,0,0,0.4)] content-stretch flex flex-col items-center justify-between overflow-clip pb-[16px] pt-[8px] px-[8px] h-full"
         style={{ 
-          borderRadius: isHovered ? '24px' : '999px',
-          transition: 'border-radius 0.25s cubic-bezier(0.65, 0, 0.35, 1)',
+          borderRadius: outerBorderRadius,
+          transition: `border-radius ${transitionTiming}`,
         }}
       >
         <div 
           className="pointer-events-none relative shrink-0 overflow-hidden"
           style={{
-            width: isHovered ? '100%' : '48px',
-            height: isHovered ? '180px' : '48px',
-            borderRadius: isHovered ? '16px' : '9999px',
-            transition: 'width 0.25s cubic-bezier(0.65, 0, 0.35, 1), height 0.25s cubic-bezier(0.65, 0, 0.35, 1), border-radius 0.25s cubic-bezier(0.65, 0, 0.35, 1)',
+            width: isExpanded ? '100%' : '48px',
+            height: isExpanded ? '180px' : '48px',
+            borderRadius: isExpanded ? '16px' : isResting ? '12px' : '40px',
+            transition: `width ${transitionTiming}, height ${transitionTiming}, border-radius ${transitionTiming}`,
           }}
         >
           <img 
@@ -53,8 +91,9 @@ export function ScrollIndicator({
             className="absolute inset-0 max-w-none object-cover size-full" 
             src={currentImage}
             style={{
-              transform: isHovered ? 'scale(1)' : 'scale(1.15)',
-              transition: 'opacity 0.35s cubic-bezier(0.65, 0, 0.35, 1), transform 0.25s cubic-bezier(0.65, 0, 0.35, 1)',
+              transform: isExpanded ? 'scale(1)' : isResting ? 'scale(0.5)' : 'scale(1.15)',
+              opacity: isResting ? 0 : 1,
+              transition: `opacity ${transitionTiming}, transform ${transitionTiming}`,
             }}
           />
           <div aria-hidden="true" className="absolute border border-[rgba(255,255,255,0)] border-solid inset-0 rounded-[inherit]" />
@@ -62,9 +101,9 @@ export function ScrollIndicator({
         <p 
           className="font-['KH_Teka:Regular',sans-serif] leading-[normal] not-italic relative shrink-0 text-[16px] text-center"
           style={{
-            color: isHovered ? 'white' : 'rgba(255,255,255,0)',
-            marginTop: isHovered ? '12px' : '0px',
-            opacity: isHovered ? 1 : 0,
+            color: isExpanded ? 'white' : 'rgba(255,255,255,0)',
+            marginTop: isExpanded ? '12px' : '0px',
+            opacity: isExpanded && !isResting ? 1 : 0,
             transitionProperty: 'opacity, color, margin-top',
             transitionDuration: '0.25s',
             transitionTimingFunction: 'cubic-bezier(0.65, 0, 0.35, 1)',
@@ -74,7 +113,14 @@ export function ScrollIndicator({
         >
           {currentTitle}
         </p>
-        <div className="content-stretch flex flex-col font-['KH_Teka:Regular',sans-serif] items-center leading-[normal] not-italic relative shrink-0 text-center" style={{ marginTop: isHovered ? '8px' : '0px', transition: 'margin-top 0.25s cubic-bezier(0.65, 0, 0.35, 1)' }}>
+        <div
+          className="content-stretch flex flex-col font-['KH_Teka:Regular',sans-serif] items-center leading-[normal] not-italic relative shrink-0 text-center"
+          style={{
+            marginTop: isExpanded ? '8px' : '0px',
+            opacity: !isResting ? 1 : 0,
+            transition: 'margin-top 0.25s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.25s cubic-bezier(0.65, 0, 0.35, 1)',
+          }}
+        >
           <p className="relative shrink-0 text-[14px] text-white">{currentTime}</p>
           <p className="relative shrink-0 text-[10px] text-[rgba(255,255,255,0.4)]">{currentPeriod}</p>
         </div>
