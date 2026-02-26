@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-
-const img1 = "https://placehold.co/400x400";
-const img2 = "https://placehold.co/400x400";
-const img3 = "https://placehold.co/400x400";
+import img1 from "@/assets/img1.jpg";
+import img2 from "@/assets/img2.jpg";
+import img3 from "@/assets/img3.jpg";
 import { ScrollIndicator } from './components/ScrollIndicator';
 
 const stages = [
