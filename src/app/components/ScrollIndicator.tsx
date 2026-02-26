@@ -49,8 +49,21 @@ export function ScrollIndicator({
   const topPosition = 16 + scrollProgress * (window.innerHeight - 270);
 
   const isExpanded = isHovered && !isResting;
-  const outerBorderRadius = isResting ? '12px' : isExpanded ? '24px' : '40px';
+  const outerBorderRadius = isExpanded ? '24px' : '40px';
   const transitionTiming = '0.25s cubic-bezier(0.65, 0, 0.35, 1)';
+
+  // Transition sequencing:
+  // - default -> resting: fade out content first, then shrink/scale
+  // - resting -> expanded/default: start scale slightly before fading content in
+  const sizeTransition = isResting
+    ? `width ${transitionTiming} 0.25s, height ${transitionTiming} 0.25s`
+    : `width ${transitionTiming} 0s, height ${transitionTiming} 0s`;
+  const imageTransition = isResting
+    ? `opacity ${transitionTiming} 0s, transform ${transitionTiming} 0.25s`
+    : `opacity ${transitionTiming} 0.15s, transform ${transitionTiming} 0s`;
+  const timeBlockTransition = isResting
+    ? `margin-top ${transitionTiming} 0s, opacity ${transitionTiming} 0s`
+    : `margin-top ${transitionTiming} 0s, opacity ${transitionTiming} 0.15s`;
 
   return (
     <div
@@ -58,8 +71,8 @@ export function ScrollIndicator({
       style={{ 
         top: `${topPosition}px`,
         width: isResting ? '4px' : isExpanded ? '288px' : '64px',
-        height: isResting ? '140px' : isExpanded ? '270px' : '199px',
-        transition: `width ${transitionTiming}, height ${transitionTiming}`,
+        height: isResting ? '199px' : isExpanded ? '270px' : '199px',
+        transition: sizeTransition,
       }}
       onMouseEnter={() => {
         setIsHovered(true);
@@ -75,6 +88,7 @@ export function ScrollIndicator({
         style={{ 
           borderRadius: outerBorderRadius,
           transition: `border-radius ${transitionTiming}`,
+          padding: isResting ? '4px' : undefined,
         }}
       >
         <div 
@@ -82,7 +96,7 @@ export function ScrollIndicator({
           style={{
             width: isExpanded ? '100%' : '48px',
             height: isExpanded ? '180px' : '48px',
-            borderRadius: isExpanded ? '16px' : isResting ? '12px' : '40px',
+            borderRadius: isExpanded ? '16px' : '40px',
             transition: `width ${transitionTiming}, height ${transitionTiming}, border-radius ${transitionTiming}`,
           }}
         >
@@ -93,7 +107,7 @@ export function ScrollIndicator({
             style={{
               transform: isExpanded ? 'scale(1)' : isResting ? 'scale(0.5)' : 'scale(1.15)',
               opacity: isResting ? 0 : 1,
-              transition: `opacity ${transitionTiming}, transform ${transitionTiming}`,
+              transition: imageTransition,
             }}
           />
           <div aria-hidden="true" className="absolute border border-[rgba(255,255,255,0)] border-solid inset-0 rounded-[inherit]" />
@@ -118,7 +132,7 @@ export function ScrollIndicator({
           style={{
             marginTop: isExpanded ? '8px' : '0px',
             opacity: !isResting ? 1 : 0,
-            transition: 'margin-top 0.25s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.25s cubic-bezier(0.65, 0, 0.35, 1)',
+            transition: timeBlockTransition,
           }}
         >
           <p className="relative shrink-0 text-[14px] text-white">{currentTime}</p>

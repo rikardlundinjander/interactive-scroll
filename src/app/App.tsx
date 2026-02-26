@@ -92,7 +92,7 @@ export default function App() {
       {/* Scrollable content with native scroll snapping */}
       <div
         ref={scrollContainerRef}
-        className="relative z-0 h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth"
+        className="relative z-0 h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth scrollbar-hidden"
       >
         <section className="h-screen snap-start" />
         <section className="h-screen snap-center" />
