@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import img1 from "@/assets/img1.png";
 import img2 from "@/assets/img2.png";
 import img3 from "@/assets/img3.png";
@@ -14,11 +14,15 @@ export default function App() {
   const [currentStage, setCurrentStage] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
     const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollTop = container.scrollTop;
+      const docHeight = container.scrollHeight - container.clientHeight;
       const progress = docHeight > 0 ? scrollTop / docHeight : 0;
       setScrollProgress(progress);
 
@@ -32,9 +36,9 @@ export default function App() {
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    container.addEventListener('scroll', handleScroll);
     handleScroll(); // Initial call
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
@@ -49,7 +53,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="relative w-full min-h-screen">
+    <div className="relative w-full h-screen overflow-hidden">
       {/* Full screen background with fade transitions */}
       <div className="fixed inset-0 -z-10">
         {stages.map((stage, index) => (
@@ -67,9 +71,14 @@ export default function App() {
         ))}
       </div>
       
-      {/* Scrollable content to enable scrolling */}
-      <div className="relative z-0 h-[300vh]">
-        {/* Empty content area to make page scrollable */}
+      {/* Scrollable content with native scroll snapping */}
+      <div
+        ref={scrollContainerRef}
+        className="relative z-0 h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth"
+      >
+        <section className="h-screen snap-start" />
+        <section className="h-screen snap-center" />
+        <section className="h-screen snap-end" />
       </div>
       
       {/* Interactive scroll indicator */}
