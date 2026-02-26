@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import img1 from "figma:asset/1444f60ebed7c860d1cb303ee0b0c0b9e5eabfa9.png";
-import img2 from "figma:asset/0faabb4333aaf536737093cad721efec19dacdd5.png";
-import img3 from "figma:asset/a8eb66588b39892a0a80e2575760d6567420f429.png";
+import img1 from "https://placehold.co/400x400";
+import img2 from "https://placehold.co/400x400";
+import img3 from "https://placehold.co/400x400";
 import { ScrollIndicator } from './components/ScrollIndicator';
 
 const stages = [
