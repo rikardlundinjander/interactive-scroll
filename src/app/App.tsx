@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import img1 from "@/assets/img1.png";
 import img2 from "@/assets/img2.png";
 import img3 from "@/assets/img3.png";
+import video01 from "@/assets/video01.mp4";
 import { ScrollIndicator } from './components/ScrollIndicator';
 
 const stages = [
@@ -56,19 +57,36 @@ export default function App() {
     <div className="relative w-full h-screen overflow-hidden">
       {/* Full screen background with fade transitions */}
       <div className="fixed inset-0 -z-10">
-        {stages.map((stage, index) => (
-          <img
-            key={index}
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-in-out"
-            src={stage.image}
-            style={{ 
-              opacity: currentStage === index ? 1 : 0,
-              transform: `translate(${mousePosition.x * 20}px, ${mousePosition.y * 20}px) scale(1.05)`,
-              transition: 'opacity 0.7s ease-in-out',
-            }}
-          />
-        ))}
+        {stages.map((stage, index) =>
+          index === 0 ? (
+            <video
+              key={index}
+              className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-in-out"
+              src={video01}
+              autoPlay
+              muted
+              loop
+              playsInline
+              style={{
+                opacity: currentStage === index ? 1 : 0,
+                transform: `translate(${mousePosition.x * 20}px, ${mousePosition.y * 20}px) scale(1.05)`,
+                transition: 'opacity 0.7s ease-in-out',
+              }}
+            />
+          ) : (
+            <img
+              key={index}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-in-out"
+              src={stage.image}
+              style={{ 
+                opacity: currentStage === index ? 1 : 0,
+                transform: `translate(${mousePosition.x * 20}px, ${mousePosition.y * 20}px) scale(1.05)`,
+                transition: 'opacity 0.7s ease-in-out',
+              }}
+            />
+          )
+        )}
       </div>
       
       {/* Scrollable content with native scroll snapping */}
