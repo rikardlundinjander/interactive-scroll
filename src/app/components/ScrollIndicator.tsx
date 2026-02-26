@@ -59,11 +59,11 @@ export function ScrollIndicator({
     ? `width ${transitionTiming} 0.25s, height ${transitionTiming} 0.25s`
     : `width ${transitionTiming} 0s, height ${transitionTiming} 0s`;
   const imageTransition = isResting
-    ? `opacity ${transitionTiming} 0s, transform ${transitionTiming} 0.25s`
-    : `opacity ${transitionTiming} 0.15s, transform ${transitionTiming} 0s`;
+    ? `opacity ${transitionTiming} 0s, transform ${transitionTiming} 0.25s, filter ${transitionTiming} 0s`
+    : `opacity ${transitionTiming} 0.15s, transform ${transitionTiming} 0s, filter ${transitionTiming} 0s`;
   const timeBlockTransition = isResting
-    ? `margin-top ${transitionTiming} 0s, opacity ${transitionTiming} 0s`
-    : `margin-top ${transitionTiming} 0s, opacity ${transitionTiming} 0.15s`;
+    ? `margin-top ${transitionTiming} 0s, opacity ${transitionTiming} 0s, filter ${transitionTiming} 0s`
+    : `margin-top ${transitionTiming} 0s, opacity ${transitionTiming} 0.15s, filter ${transitionTiming} 0s`;
 
   return (
     <div
@@ -107,6 +107,7 @@ export function ScrollIndicator({
             style={{
               transform: isExpanded ? 'scale(1)' : isResting ? 'scale(0.5)' : 'scale(1.15)',
               opacity: isResting ? 0 : 1,
+              filter: isResting ? 'blur(16px)' : 'blur(0px)',
               transition: imageTransition,
             }}
           />
@@ -132,6 +133,7 @@ export function ScrollIndicator({
           style={{
             marginTop: isExpanded ? '8px' : '0px',
             opacity: !isResting ? 1 : 0,
+            filter: isResting ? 'blur(16px)' : 'blur(0px)',
             transition: timeBlockTransition,
           }}
         >
